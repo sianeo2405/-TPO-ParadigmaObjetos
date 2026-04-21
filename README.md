@@ -1,49 +1,83 @@
-# RPG por Turnos: Oathbreaker - The Sunken Realm
+# ⚔️ Oathbreaker: The Sunken Realm
 
-## 📝 Descripción del Proyecto
-Este proyecto consiste en el diseño e implementación de un **videojuego de rol (RPG) por turnos** desarrollado bajo el Paradigma de Orientado a Objetos. Inspirado en la profundidad estratégica de *Dungeons & Dragons* y la estética de combate de *Expedition 33*, el sistema se centra en combates tácticos sucesivos sin exploración libre del mapa.
-
-El núcleo del juego permite controlar una *party* de entre 2 y 4 héroes con clases especializadas que deben enfrentarse a diversas amenazas en un sistema de progresión por niveles.
+> *Trabajo Práctico: Paradigma Orientado a Objetos (Fase A)*
+> Un RPG táctico por turnos donde la estrategia y la gestión de recursos son la clave para la supervivencia.
 
 ---
 
-## 🛠️ Requerimientos Técnicos (Fase A)
-Siguiendo las pautas de la **Fase A**, el sistema modela los siguientes elementos:
+## 📜 Sobre el Proyecto
 
-* **Sistema de Combate:** Basado en turnos dinámicos calculados según la velocidad de cada entidad.
-* **Gestión de Clases:** Implementación de arquetipos como Guerrero, Mago, Arquero o Curador.
-* **Atributos Mínimos:** Cada personaje almacena nombre, vida (HP), maná/puntos de acción (PA), ataque, defensa, velocidad, nivel y experiencia.
-* **Habilidades y Recursos:** Uso de habilidades que consumen recursos específicos (ej. PA).
-* **Inventario y Equipamiento:** Administración de armas, armaduras y accesorios (anillos) que modifican estadísticas.
-* **Progresión:** Sistema de recompensas de experiencia, oro y subida de nivel con mejora de atributos.
+*Oathbreaker: The Sunken Realm* es un videojuego de rol (RPG) por turnos diseñado íntegramente bajo los principios del Paradigma Orientado a Objetos. Inspirado en la profundidad táctica de los combates de Dungeons & Dragons y la estética de Expedition 33, el juego se centra en un sistema de encuentros de combate sucesivos, exigentes y altamente estratégicos.
+
+El jugador toma el mando de una party personalizable de entre 2 y 4 héroes, debiendo equilibrar sus habilidades, equipamiento y sinergias para superar las distintas amenazas del reino hundido.
 
 ---
 
-## 📊 Arquitectura y Diseño
-El diseño se ha documentado mediante diagramas UML para asegurar un acoplamiento bajo y una alta cohesión entre componentes.
+## ⚙️ Mecánicas Principales
 
-### Diagrama de Clases
-El diagrama de clases describe la jerarquía del dominio, incluyendo personajes, enemigos, ítems y la estructura de datos del sistema.
-> *Ubicación: `docs/diagrama_clases.png`*
+A diferencia de los RPGs tradicionales, el núcleo de Oathbreaker reside en su sistema de combate dinámico y la gestión técnica del grupo:
 
-### Diagramas de Secuencia
-Se han definido flujos críticos para entender el comportamiento dinámico del motor:
-1.  **Lógica de Combate:** Detalla el ciclo de vida de un turno y las interacciones entre atacante y objetivo.
-2.  **Sistema de Mapa/Navegación:** Explica la transición entre pantallas y estados del juego.
+* *⏳ Turnos por Iniciativa (Velocidad):* El orden de acción no es fijo. Se calcula dinámicamente en base al atributo de Velocidad de cada entidad, permitiendo a los personajes más ágiles actuar múltiples veces antes que los enemigos pesados.
+* *🎒 Sistema de Equipamiento Avanzado:* El inventario es crucial. Los atributos base se modifican mediante la administración de armas, armaduras y accesorios (anillos/amuletos) que impactan directamente en las estadísticas de combate. 
+* *✨ Gestión de Recursos (PA/Maná):* Las habilidades especiales consumen Puntos de Acción (PA) o Maná. Administrar estos recursos a lo largo de combates consecutivos es vital para no quedar indefenso ante el jefe final.
+* *📈 Progresión y Recompensas:* Derrotar enemigos otorga Experiencia (EXP) y Oro. Al subir de nivel, los personajes mejoran sus atributos, permitiendo una personalización del crecimiento del equipo.
 
 ---
 
-## 📁 Estructura del Proyecto y Capturas
-A continuación, se detalla la estructura del proyecto y se muestran capturas de pantalla que ilustran el flujo y la interfaz gráfica implementada.
+## 🛡️ Clases y Arquetipos
 
-### Árbol de Directorios
+El sistema permite formar el grupo eligiendo entre cuatro clases clásicas, cada una con responsabilidades únicas dentro del código y del combate:
+
+1. *Guerrero:* El tanque del equipo. Alto HP y Defensa. Su rol es absorber daño y proteger a los aliados más frágiles.
+2. *Mago:* Daño en área y control. Sus habilidades consumen mucho Maná, pero pueden alterar el curso de la batalla.
+3. *Arquero:* Daño físico a un solo objetivo con alta letalidad y gran velocidad de iniciativa.
+4. *Curador (Healer):* Indispensable para la supervivencia. Restaura HP y elimina estados alterados del grupo.
+
+---
+
+## 🏗️ Arquitectura y Documentación Técnica
+
+El diseño del sistema está documentado mediante diagramas que detallan la lógica de los objetos y sus interacciones. Estos se encuentran disponibles en formato de texto plano para su visualización en herramientas de modelado:
+
+* *Diagrama de Clases:* Describe la jerarquía de herencia entre la clase base Entidad y sus derivaciones, además de la estructura del sistema de ítems.
+  * Archivo: docs/diagrama_clases.txt
+* *Diagramas de Secuencia:* Detallan los flujos dinámicos del motor.
+  * *Lógica de Combate:* Resolución de turnos y cálculo de daño. (Archivo: docs/diagramaSecuenciaCombate.txt)
+  * *Navegación:* Transición entre pantallas y estados del juego. (Archivo: docs/diagramaSecuenciaMapa.txt)
+
+---
+
+## 🖼️ Interfaz Visual (Prototipos)
+
+El juego cuenta con un diseño de interfaz modular, pensado para mostrar toda la información táctica de manera clara. A continuación se presentan los mockups de las vistas implementadas:
+
+### 1. Menú Principal
+Punto de inicio del juego con acceso a nuevas partidas y gestión de configuración.
+![Menú Principal](Imagenes/menuprincipal.png.jpeg)
+
+### 2. Mapa de Encuentros
+Muestra las rutas disponibles y los próximos nodos de combate o descanso.
+![Mapa](Imagenes/mapa.jpeg)
+
+### 3. Sistema de Combate
+Interfaz principal donde se visualizan las barras de vida, maná y el orden de los turnos.
+![Combate](Imagenes/combate.jpeg)
+
+### 4. Resultados Post-Combate
+Resumen de botín adquirido (Oro, Ítems) y experiencia ganada tras la victoria.
+![Resultados](Imagenes/post%20combate.jpeg)
+
+---
+
+## 📁 Estructura del Repositorio
+
 ```text
 .
-├── assets/             # Recursos visuales e imágenes de la interfaz
-├── docs/               # Diagramas de Clase y Secuencia (Entregables Fase A)
+├── Imagenes/           # Mockups y capturas de interfaz (.jpeg)
+├── docs/               # Diagramas UML en formato texto (.txt)
 ├── src/
-│   ├── model/          # Lógica de negocio (Java)
-│   ├── controller/     # Motor de combate y turnos
-│   ├── view/           # Interfaz gráfica (Swing/JavaFX)
-│   └── persistence/    # Guardado y recuperación de partidas
+│   ├── model/          # Lógica de negocio y entidades
+│   ├── controller/     # Controladores de turnos e inventario
+│   ├── view/           # Vistas y componentes UI
+│   └── persistence/    # Sistema de guardado
 └── README.md
