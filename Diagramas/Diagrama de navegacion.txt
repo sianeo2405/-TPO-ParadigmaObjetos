@@ -11,7 +11,7 @@ MapaController->NodoMapa: esAccesible()
 NodoMapa-->MapaController: true / false
 
 alt accesible
-    MapaController->MapaController: actualizarNodoActual(nodo)
+    MapaController->MapaController: actualizarNodoActual(nodoId)
 else no accesible
     MapaController->MapaUI: mostrarError()
 end
