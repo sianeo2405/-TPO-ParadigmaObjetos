@@ -1,0 +1,225 @@
+package com.nodequest.game;
+
+import com.nodequest.model.CharacterClass;
+import com.nodequest.model.Combatant;
+import com.nodequest.model.Enemy;
+import com.nodequest.model.Party;
+import com.nodequest.model.PartyMember;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public final class CombatEngine implements java.io.Serializable {
+    private final Party party;
+    private final List<Enemy> enemies = new ArrayList<>();
+    private final List<String> log = new ArrayList<>();
+    private final Random random = new Random();
+    private final List<Combatant> turnOrder = new ArrayList<>();
+    private int currentCombatantIndex = 0;
+    private boolean playerTurn = true;
+    private int turnIndex;
+
+    public CombatEngine(Party party) {
+        this.party = party;
+    }
+
+    public void startEncounter(List<Enemy> encounterEnemies) {
+        enemies.clear();
+        enemies.addAll(encounterEnemies);
+        log.clear();
+        turnIndex = 0;
+        append("¡Aparecen enemigos!");
+        determineTurnOrder();
+        startNextTurn();
+    }
+
+    public Combatant getActiveCombatant() {
+        if (currentCombatantIndex >= 0 && currentCombatantIndex < turnOrder.size()) {
+            return turnOrder.get(currentCombatantIndex);
+        }
+        return null;
+    }
+
+    public PartyMember getActiveHero() {
+        Combatant active = getActiveCombatant();
+        if (active instanceof PartyMember) {
+            return (PartyMember) active;
+        }
+        return null;
+    }
+
+    private void determineTurnOrder() {
+        turnOrder.clear();
+        turnOrder.addAll(party.getAliveMembers());
+        turnOrder.addAll(getAliveEnemies());
+        turnOrder.sort((c1, c2) -> Integer.compare(c2.getSpeed(), c1.getSpeed()));
+        currentCombatantIndex = 0;
+
+        StringBuilder sb = new StringBuilder("Orden de turnos: ");
+        for (int i = 0; i < turnOrder.size(); i++) {
+            sb.append(turnOrder.get(i).getName());
+            if (i < turnOrder.size() - 1) {
+                sb.append(" -> ");
+            }
+        }
+        append(sb.toString());
+    }
+
+    private void startNextTurn() {
+        if (isCombatOver() || isPartyWiped()) {
+            return;
+        }
+
+        while (currentCombatantIndex < turnOrder.size()) {
+            Combatant next = turnOrder.get(currentCombatantIndex);
+            if (next.isAlive()) {
+                if (next instanceof PartyMember) {
+                    playerTurn = true;
+                    append("¡Es el turno de " + next.getName() + "!");
+                    return;
+                } else if (next instanceof Enemy) {
+                    playerTurn = false;
+                    runSingleEnemyTurn((Enemy) next);
+                    currentCombatantIndex++;
+                    startNextTurn();
+                    return;
+                }
+            } else {
+                currentCombatantIndex++;
+            }
+        }
+
+        turnIndex++;
+        append("— Turno " + (turnIndex + 1) + " —");
+        determineTurnOrder();
+        startNextTurn();
+    }
+
+    public List<Enemy> getEnemies() {
+        return enemies;
+    }
+
+    public List<Enemy> getAliveEnemies() {
+        List<Enemy> alive = new ArrayList<>();
+        for (Enemy enemy : enemies) {
+            if (enemy.isAlive()) {
+                alive.add(enemy);
+            }
+        }
+        return alive;
+    }
+
+    public List<String> getLog() {
+        return List.copyOf(log);
+    }
+
+    public boolean isPlayerTurn() {
+        return playerTurn;
+    }
+
+    public boolean isCombatOver() {
+        return getAliveEnemies().isEmpty();
+    }
+
+    public boolean isPartyWiped() {
+        return party.isWiped();
+    }
+
+    public void attack(PartyMember attacker, Enemy target) {
+        if (!playerTurn || !attacker.isAlive() || !target.isAlive()) {
+            return;
+        }
+        int damage = attacker.getAttack() + random.nextInt(5);
+        target.takeDamage(damage);
+        int restoredMp = attacker.restoreMp(attacker.getMaxMp()/10);
+        append(attacker.getName() + " ataca a " + target.getName() + " por " + damage + " daño y recupera " + restoredMp + " de MP.");
+        endPlayerAction();
+    }
+
+    public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarget) {
+        if (!playerTurn || !caster.isAlive()) {
+            return;
+        }
+        int mpCost = caster.getSkillMpCost();
+        if (!caster.spendMp(mpCost)) {
+            append(caster.getName() + " no tiene MP para usar " + caster.getCharacterClass().getSkillName() + ".");
+            return;
+        }
+
+        switch (caster.getCharacterClass()) {
+            case WARRIOR -> warriorSkill(caster, enemyTarget);
+            case MAGE -> mageSkill(caster);
+            case ARCHER -> archerSkill(caster, enemyTarget);
+            case HEALER -> healerSkill(caster, allyTarget);
+        }
+        endPlayerAction();
+    }
+
+    private void warriorSkill(PartyMember caster, Enemy target) {
+        if (target == null || !target.isAlive()) {
+            append(caster.getName() + " no encuentra objetivo para taclear.");
+            caster.restoreMp(caster.getSkillMpCost());
+            return;
+        }
+        int damage = caster.getAttack() + 12 + random.nextInt(6);
+        target.takeDamage(damage);
+        target.reduceAttack(4);
+        append(caster.getName() + " taclea a " + target.getName()
+                + " (" + damage + " daño, ataque reducido).");
+    }
+
+    private void healerSkill(PartyMember caster, PartyMember ally) {
+        PartyMember target = ally != null && ally.isAlive() ? ally : caster;
+        int healAmount = 35 + random.nextInt(15);
+        target.heal(healAmount);
+        append(caster.getName() + " cura a " + target.getName() + " por " + healAmount + " HP.");
+    }
+
+    private void archerSkill(PartyMember caster, Enemy target) {
+        int damage = caster.getAttack() * 5 + 5;
+        target.takeDamage(damage);
+        append(caster.getName() + " acierta una flecha directo en el punto débil de " + target.getName() + ", haciendo " + damage + " de daño.");
+    }
+
+    private void mageSkill(PartyMember caster) {
+        int damage = caster.getAttack() * 3 + 10;
+        for (Enemy enemy : getAliveEnemies()) {
+            enemy.takeDamage(damage);
+        }
+        for (PartyMember ally : party.getAliveMembers()) {
+            ally.takeDamage(damage);
+        }
+        append(caster.getName() + " lanza una masiva explosión mágica, haciendo " + damage + " de daño a TODOS.");
+    }
+
+    private void endPlayerAction() {
+        if (isCombatOver()) {
+            append("Los enemigos caen. ¡Victoria!");
+            playerTurn = false;
+            return;
+        }
+        currentCombatantIndex++;
+        startNextTurn();
+    }
+
+    private void runSingleEnemyTurn(Enemy enemy) {
+        List<PartyMember> targets = party.getAliveMembers();
+        if (targets.isEmpty()) {
+            append("Tu equipo fue derrotado...");
+            return;
+        }
+
+        PartyMember target = targets.get(random.nextInt(targets.size()));
+        int damage = enemy.getAttack() + random.nextInt(4);
+        target.takeDamage(damage);
+        append(enemy.getName() + " ataca a " + target.getName() + " por " + damage + " daño.");
+    }
+
+    private void append(String message) {
+        log.add(message);
+        if (log.size() > 80) {
+            log.remove(0);
+        }
+    }
+}
