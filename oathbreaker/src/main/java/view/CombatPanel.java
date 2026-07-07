@@ -3,7 +3,6 @@ package view;
 import controller.CombatEngine;
 import controller.GameController;
 import controller.GameScreen;
-import model.CharacterClass;
 import model.Enemy;
 import model.PartyMember;
 
@@ -103,14 +102,18 @@ public final class CombatPanel extends BackgroundPanel {
             return;
         }
         CombatEngine combat = controller.getCombatEngine();
-        statusLabel.setText(controller.getStatusMessage());
+        if (combat.isPlayerTurn() && combat.getActiveHero() != null) {
+            statusLabel.setText("Es el turno de " + combat.getActiveHero().getName() + ". Selecciona una acción.");
+        } else {
+            statusLabel.setText(controller.getStatusMessage());
+}
         turnOrderPanel.refresh(combat);
 
         selectedHero = combat.getActiveHero();
         if (selectedHero != null) {
-            CharacterClass cls = selectedHero.getCharacterClass();
-            skillButton.setText(cls.getSkillName() + " (" + selectedHero.getSkillMpCost() + " MP)");
-            skillButton.setToolTipText(cls.getSkillDescription());
+            // Ya no usamos el enum, le preguntamos directo al héroe (Polimorfismo)
+            skillButton.setText(selectedHero.getSkillName() + " (" + selectedHero.getSkillMpCost() + " MP)");
+            skillButton.setToolTipText(selectedHero.getSkillDescription());
         } else {
             skillButton.setText("Habilidad");
         }
@@ -236,14 +239,15 @@ public final class CombatPanel extends BackgroundPanel {
         card.setOpaque(false);
 
         JLabel spriteLabel = new JLabel();
-        String spriteKey = "party_" + member.getCharacterClass().name().toLowerCase();
+        // getClass().getSimpleName() devuelve "Warrior", "Mage", etc. Lo pasamos a minúsculas para que coincida con tus archivos PNG
+        String spriteKey = "party_" + member.getClass().getSimpleName().toLowerCase();
         Image img = ImageManager.loadSprite(spriteKey);
         if (img != null) {
             Image scaled = img.getScaledInstance(180, 240, Image.SCALE_SMOOTH);
             spriteLabel.setIcon(new ImageIcon(scaled));
             spriteLabel.setHorizontalAlignment(JLabel.CENTER);
         } else {
-            spriteLabel.setText("[" + member.getCharacterClass().getDisplayName() + "]");
+            spriteLabel.setText("[" + member.getRoleName() + "]");
             spriteLabel.setFont(spriteLabel.getFont().deriveFont(Font.BOLD, 14f));
             spriteLabel.setForeground(Color.WHITE);
             spriteLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -277,10 +281,8 @@ public final class CombatPanel extends BackgroundPanel {
             return;
         }
         controller.getCombatEngine().attack(selectedHero, target);
-        controller.checkCombatEnd();
-        if (controller.getScreen() == GameScreen.COMBAT) {
-            controller.notifyListeners();
-        }
+        
+        handleActionEnd(); // Delegamos el chequeo al nuevo método
     }
 
     private void performSkill() {
@@ -290,7 +292,44 @@ public final class CombatPanel extends BackgroundPanel {
         Enemy enemyTarget = (Enemy) enemyTargetBox.getSelectedItem();
         PartyMember allyTarget = (PartyMember) allyTargetBox.getSelectedItem();
         controller.getCombatEngine().useSkill(selectedHero, allyTarget, enemyTarget);
+        
+        handleActionEnd(); // Delegamos el chequeo al nuevo método
+    }
+
+    // NUEVO MÉTODO: Centraliza el fin de la acción y muestra el cartel
+    private void handleActionEnd() {
         controller.checkCombatEnd();
+        
+        // Verificamos si el combate acaba de terminar en victoria (volviendo al MAP o VICTORY)
+        if (controller.getScreen() == GameScreen.MAP || controller.getScreen() == GameScreen.VICTORY) {
+            
+            // Verificamos que realmente haya habido recompensas
+            if (controller.getLastGoldGained() > 0 || controller.getLastXpGained() > 0) {
+                StringBuilder msg = new StringBuilder();
+                msg.append("¡Los enemigos han sido derrotados!\n\n");
+                msg.append("Recompensas:\n");
+                msg.append("💰 Oro: ").append(controller.getLastGoldGained()).append("\n");
+                msg.append("✨ Experiencia: ").append(controller.getLastXpGained()).append("\n");
+                
+                // Agregamos las subidas de nivel si ocurrieron
+                if (!controller.getLastLevelUps().isEmpty()) {
+                    msg.append("\n¡Subidas de Nivel!\n");
+                    for (String levelUpMsg : controller.getLastLevelUps()) {
+                        msg.append(levelUpMsg).append("\n");
+                    }
+                }
+                
+                // Mostramos el pop-up nativo de Java Swing
+                javax.swing.JOptionPane.showMessageDialog(
+                    javax.swing.SwingUtilities.getWindowAncestor(this), 
+                    msg.toString(), 
+                    "¡Victoria!", 
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+        }
+        
+        // Si seguimos en combate, refrescamos la pantalla normalmente
         if (controller.getScreen() == GameScreen.COMBAT) {
             controller.notifyListeners();
         }

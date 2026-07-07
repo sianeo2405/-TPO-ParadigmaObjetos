@@ -62,10 +62,11 @@ public final class Party implements java.io.Serializable {
         if (!inventory.contains(item)) {
             return "No tienes ese objeto.";
         }
-        if (item.getEffect() == Item.Effect.REVIVE && target.isAlive()) {
+        boolean isRevive = item.getEffect() instanceof Item.ReviveEffect;
+        if (isRevive && target.isAlive()) {
             return target.getName() + " ya está vivo.";
         }
-        if (item.getEffect() != Item.Effect.REVIVE && !target.isAlive()) {
+        if (!isRevive && !target.isAlive()) {
             return target.getName() + " está inconsciente.";
         }
         String result = item.applyTo(target);

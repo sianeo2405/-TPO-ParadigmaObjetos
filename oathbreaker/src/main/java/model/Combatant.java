@@ -40,6 +40,8 @@ public abstract class Combatant implements java.io.Serializable {
         return currentHp > 0;
     }
 
+    public abstract boolean isPlayerControlled();
+
     public int getAttack() {
         return attack;
     }

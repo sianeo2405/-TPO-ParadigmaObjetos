@@ -45,7 +45,7 @@ public final class CombatEngine implements java.io.Serializable {
 
     public PartyMember getActiveHero() {
         Combatant active = getActiveCombatant();
-        if (active instanceof PartyMember) {
+        if (active != null && active.isPlayerControlled()) {
             return (PartyMember) active;
         }
         return null;
@@ -75,20 +75,15 @@ public final class CombatEngine implements java.io.Serializable {
 
         while (currentCombatantIndex < turnOrder.size()) {
             Combatant next = turnOrder.get(currentCombatantIndex);
-            if (next.isAlive()) {
-                if (next instanceof PartyMember) {
-                    playerTurn = true;
-                    //append("¡Es el turno de " + next.getName() + "!");
-                    return;
-                } else if (next instanceof Enemy) {
-                    playerTurn = false;
-                    runSingleEnemyTurn((Enemy) next);
-                    currentCombatantIndex++;
-                    startNextTurn();
-                    return;
-                }
+            if (next.isPlayerControlled()) {
+                playerTurn = true;
+                return;
             } else {
+                playerTurn = false;
+                runSingleEnemyTurn((Enemy) next);
                 currentCombatantIndex++;
+                startNextTurn();
+                return;
             }
         }
 
@@ -139,59 +134,20 @@ public final class CombatEngine implements java.io.Serializable {
         endPlayerAction();
     }
 
-    public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarget) {
+public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarget) {
         if (!playerTurn || !caster.isAlive()) {
             return;
         }
-        int mpCost = caster.getSkillMpCost();
+        int mpCost = caster.getSkillMpCost(); // Ahora usa polimorfismo
         if (!caster.spendMp(mpCost)) {
-            //append(caster.getName() + " no tiene MP para usar " + caster.getCharacterClass().getSkillName() + ".");
-            return;
+            return; // No tiene MP
         }
 
-        switch (caster.getCharacterClass()) {
-            case WARRIOR -> warriorSkill(caster, enemyTarget);
-            case MAGE -> mageSkill(caster);
-            case ARCHER -> archerSkill(caster, enemyTarget);
-            case HEALER -> healerSkill(caster, allyTarget);
-        }
+        // ¡MAGIA DE POO! Una sola línea reemplaza a todo el switch gigante.
+        // El motor le dice al héroe: "Ejecutá tu habilidad, no me importa cómo lo hagas".
+        caster.executeSkill(this, allyTarget, enemyTarget);
+        
         endPlayerAction();
-    }
-
-    private void warriorSkill(PartyMember caster, Enemy target) {
-        if (target == null || !target.isAlive()) {
-            //append(caster.getName() + " no encuentra objetivo para taclear.");
-            caster.restoreMp(caster.getSkillMpCost());
-            return;
-        }
-        int damage = caster.getAttack() + 12;
-        target.takeDamage(damage);
-        target.reduceAttack(4);
-        //append(caster.getName() + " taclea a " + target.getName() + " (" + damage + " daño, ataque reducido).");
-    }
-
-    private void healerSkill(PartyMember caster, PartyMember ally) {
-        PartyMember target = ally != null && ally.isAlive() ? ally : caster;
-        int healAmount = caster.getMaxHp()/2;
-        target.heal(healAmount);
-        //append(caster.getName() + " cura a " + target.getName() + " por " + healAmount + " HP.");
-    }
-
-    private void archerSkill(PartyMember caster, Enemy target) {
-        int damage = caster.getAttack() * 5 + 5;
-        target.takeDamage(damage);
-        //append(caster.getName() + " acierta una flecha directo en el punto débil de " + target.getName() + ", haciendo " + damage + " de daño.");
-    }
-
-    private void mageSkill(PartyMember caster) {
-        int damage = caster.getAttack() * 3 + 10;
-        for (Enemy enemy : getAliveEnemies()) {
-            enemy.takeDamage(damage);
-        }
-        for (PartyMember ally : party.getAliveMembers()) {
-            ally.takeDamage(damage);
-        }
-        //append(caster.getName() + " lanza una masiva explosión mágica, haciendo " + damage + " de daño a TODOS.");
     }
 
     private void endPlayerAction() {
@@ -204,7 +160,7 @@ public final class CombatEngine implements java.io.Serializable {
         startNextTurn();
     }
 
-    private void runSingleEnemyTurn(Enemy enemy) {
+    private void runSingleEnemyTurn(Combatant enemy) {
         List<PartyMember> targets = party.getAliveMembers();
         if (targets.isEmpty()) {
             //append("Tu equipo fue derrotado...");

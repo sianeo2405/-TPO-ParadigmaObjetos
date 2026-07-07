@@ -26,6 +26,11 @@ public final class Enemy extends Combatant {
         return Math.max(1, attack - attackDebuff);
     }
 
+    @Override
+    public boolean isPlayerControlled() {
+        return false;
+    }
+
     public void reduceAttack(int amount) {
         attackDebuff += amount;
     }

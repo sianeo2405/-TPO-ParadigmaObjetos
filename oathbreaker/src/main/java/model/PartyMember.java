@@ -1,95 +1,77 @@
 package model;
 
+import controller.CombatEngine;
 import java.util.ArrayList;
 import java.util.List;
 
-// Representa un miembro del grupo del jugador, con estadísticas y habilidades específicas según su clase.
-
-public final class PartyMember extends Combatant {
-    private final String name;
-    private final CharacterClass characterClass;
-    private int maxHp;
-    private int currentHp;
-    private int maxMp;
-    private int currentMp;
-    private int attack;
-    private int defense;
-    private int speed;
-    private int attackBuff;
-    private int defenseBuff;
-    private int level = 1;
-    private int xp = 0;
-
+// Ahora es una clase Abstracta. Sirve como "molde" para los héroes específicos.
+public abstract class PartyMember extends Combatant {
+    
+    // Eliminamos la dependencia de CharacterClass y las variables repetidas de Combatant
+    protected int maxMp;
+    protected int currentMp;
+    protected int attackBuff;
+    protected int defenseBuff;
+    protected int level = 1;
+    protected int xp = 0;
+    
     private static final int[] XP_THRESHOLDS = {0, 100, 250, 450, 700, 1000};
 
-    public PartyMember(String name, CharacterClass characterClass, int maxHp, int maxMp, int attack, int defense, int speed) {
+    public PartyMember(String name, int maxHp, int maxMp, int attack, int defense, int speed) {
+        // Llamamos al constructor de la clase padre (Combatant)
         super(name, maxHp, attack, defense, speed);
-        this.name = name;
-        this.characterClass = characterClass;
-        this.maxHp = maxHp;
-        this.currentHp = maxHp;
         this.maxMp = maxMp;
         this.currentMp = maxMp;
-        this.attack = attack;
-        this.defense = defense;
-        this.speed = speed;
     }
 
-    public String getName() {
-        return name;
+    // ==========================================
+    // CONTRATOS ABSTRACTOS (El corazón del Polimorfismo)
+    // ==========================================
+    public abstract String getRoleName();
+    public abstract String getSkillName();
+    public abstract String getSkillDescription();
+    public abstract int getSkillMpCost();
+    public abstract void executeSkill(CombatEngine engine, PartyMember allyTarget, Enemy enemyTarget);
+
+    // Métodos abstractos para calcular el crecimiento de estadísticas al subir de nivel (Reemplaza al Switch)
+    protected abstract int getHpGrowth();
+    protected abstract int getMpGrowth();
+    protected abstract int getAttackGrowth();
+    protected abstract int getDefenseGrowth();
+    protected abstract int getSpeedGrowth();
+
+
+    // ==========================================
+    // MÉTODOS SOBRESCRITOS Y ESTADO
+    // ==========================================
+    
+    @Override
+    public boolean isPlayerControlled() {
+        return true;
     }
 
-    public CharacterClass getCharacterClass() {
-        return characterClass;
-    }
-
-    public int getMaxHp() {
-        return maxHp;
-    }
-
-    public int getCurrentHp() {
-        return currentHp;
-    }
-
-    public int getMaxMp() {
-        return maxMp;
-    }
-
-    public int getCurrentMp() {
-        return currentMp;
-    }
-
+    @Override
     public int getAttack() {
-        return attack + attackBuff;
+        return super.getAttack() + attackBuff;
     }
 
+    @Override
     public int getDefense() {
-        return defense + defenseBuff;
-    }
-
-    public int getSpeed() {
-        return speed;
+        return super.getDefense() + defenseBuff;
     }
 
     public int getBaseAttack() {
-        return attack;
+        return super.getAttack();
     }
 
     public int getBaseDefense() {
-        return defense;
+        return super.getDefense();
     }
 
-    public boolean isAlive() {
-        return currentHp > 0;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public int getXp() {
-        return xp;
-    }
+    public int getMaxMp() { return maxMp; }
+    public int getCurrentMp() { return currentMp; }
+    public int getLevel() { return level; }
+    public int getXp() { return xp; }
 
     public int getXpToNextLevel() {
         if (level >= XP_THRESHOLDS.length) {
@@ -103,57 +85,28 @@ public final class PartyMember extends Combatant {
             return name + " ya ha alcanzado el nivel máximo.";
         }
         xp += amount;
+        
         if (xp >= getXpToNextLevel()) {
             level++;
-            int hpGain = switch (characterClass) {
-                case WARRIOR -> 20;
-                case MAGE -> 10;
-                case ARCHER -> 15;
-                case HEALER -> 20;
-                default -> 0;
-            };
-            int mpGain = switch (characterClass) {
-                case WARRIOR -> 5;
-                case MAGE -> 20;
-                case ARCHER -> 10;
-                case HEALER -> 15;
-                default -> 0;
-            };
-            int attackGain = switch (characterClass) {
-                case WARRIOR -> 3;
-                case MAGE -> 1;
-                case ARCHER -> 3;
-                case HEALER -> 1;
-                default -> 0;
-            };
-            int defenseGain = switch (characterClass) {
-                case WARRIOR -> 3;
-                case MAGE -> 1;
-                case ARCHER -> 1;
-                case HEALER -> 2;
-                default -> 0;
-            };
-            int speedGain = switch (characterClass) {
-                case WARRIOR -> 1;
-                case MAGE -> 1;
-                case ARCHER -> 2;
-                case HEALER -> 1;
-                default -> 0;
-            };
-            maxHp += hpGain;
-            currentHp = Math.min(currentHp + hpGain, maxHp);
-            currentMp = Math.min(currentMp + mpGain, maxMp);
-            attack += attackGain;
-            defense += defenseGain;
-            speed += speedGain;
+            
+            // Usamos el polimorfismo para obtener el crecimiento según la subclase
+            int hpGain = getHpGrowth();
+            int mpGain = getMpGrowth();
+            int attackGain = getAttackGrowth();
+            int defenseGain = getDefenseGrowth();
+            int speedGain = getSpeedGrowth();
+
+            this.maxHp += hpGain;
+            this.currentHp = Math.min(this.currentHp + hpGain, this.maxHp);
+            this.maxMp += mpGain;
+            this.currentMp = Math.min(this.currentMp + mpGain, this.maxMp);
+            this.attack += attackGain;
+            this.defense += defenseGain;
+            this.speed += speedGain;
+
             return "¡" + name + " ha subido al nivel " + level + "!";
         }
         return null;
-    }
-
-    public void takeDamage(int amount) {
-        int reduced = Math.max(1, amount - getDefense());
-        currentHp = Math.max(0, currentHp - reduced);
     }
 
     public void heal(int amount) {
@@ -182,11 +135,11 @@ public final class PartyMember extends Combatant {
     }
 
     public void boostAttack(int amount) {
-        attack += amount;
+        this.attack += amount;
     }
 
     public void boostDefense(int amount) {
-        defense += amount;
+        this.defense += amount;
     }
 
     public void applyAttackBuff(int amount) {
@@ -208,26 +161,21 @@ public final class PartyMember extends Combatant {
         defenseBuff = 0;
     }
 
-    public int getSkillMpCost() {
-        return switch (characterClass) {
-            case WARRIOR -> 8;
-            case MAGE -> 30;
-            case ARCHER -> 20;
-            case HEALER -> 12;
-        };
-    }
-
     @Override
     public String toString() {
         return name + " (" + currentHp + "/" + maxHp + " HP)";
     }
 
+    // ==========================================
+    // CREADOR DE GRUPO (Factory)
+    // ==========================================
     public static Party createDefaultParty() {
         List<PartyMember> members = new ArrayList<>();
-        members.add(new PartyMember("Altria", CharacterClass.WARRIOR, 120, 30, 18, 8, 10));
-        members.add(new PartyMember("Jean", CharacterClass.HEALER, 85, 50, 12, 3, 12));
-        members.add(new PartyMember("Emil", CharacterClass.ARCHER, 70, 35, 20, 4, 15));
-        members.add(new PartyMember("Mesh", CharacterClass.MAGE, 60, 70, 10, 2, 14));
+        // NOTA: Estas líneas marcarán error temporalmente hasta que hagamos la Fase 2.
+        members.add(new Warrior("Altria", 120, 30, 18, 8, 10));
+        members.add(new Healer("Jean", 85, 50, 12, 3, 12));
+        members.add(new Archer("Emil", 70, 35, 20, 4, 15));
+        members.add(new Mage("Mesh", 60, 70, 10, 2, 14));
         return new Party(members);
     }
 }

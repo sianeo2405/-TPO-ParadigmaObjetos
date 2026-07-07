@@ -2,7 +2,6 @@ package view;
 
 import controller.CombatEngine;
 import model.Combatant;
-import model.Enemy;
 import model.PartyMember;
 
 import javax.swing.JPanel;
@@ -187,10 +186,12 @@ public final class TurnOrderPanel extends JPanel {
         g2.dispose();
     }
 
-    private Image getCombatantSprite(Combatant c) {
-        if (c instanceof PartyMember) {
-            PartyMember pm = (PartyMember) c;
-            String key = "party_" + pm.getCharacterClass().name().toLowerCase();
+private Image getCombatantSprite(Combatant c) {
+        // Usamos nuestro método polimórfico en lugar de instanceof
+        if (c.isPlayerControlled()) {
+            // CORRECCIÓN: Usamos Reflection igual que en PartyPanel y CombatPanel
+            String key = "party_" + c.getClass().getSimpleName().toLowerCase();
+            
             Image img = ImageManager.loadTurnOrderSprite(key);
             if (img == null) {
                 img = ImageManager.loadSidebarSprite(key);
@@ -199,15 +200,17 @@ public final class TurnOrderPanel extends JPanel {
                 img = ImageManager.loadSprite(key);
             }
             return img;
-        } else if (c instanceof Enemy) {
-            Enemy enemy = (Enemy) c;
-            String key = "enemy_" + enemy.getName();
+            
+        } else {
+            // Si no es controlado por el jugador, es un enemigo.
+            // Como getName() ya existe en la clase abstracta Combatant, no necesitamos hacer cast a (Enemy)
+            String key = "enemy_" + c.getName();
+            
             Image img = ImageManager.loadTurnOrderSprite(key);
             if (img == null) {
                 img = ImageManager.loadSprite(key);
             }
             return img;
         }
-        return null;
     }
 }

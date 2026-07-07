@@ -91,10 +91,11 @@ public final class PartyPanel extends JPanel {
             add(infoPanel, BorderLayout.CENTER);
         }
 
-        void refresh(PartyMember member, boolean isActive) {
+void refresh(PartyMember member, boolean isActive) {
             nameLabel.setText(member.getName() + " (Nv " + member.getLevel() + ")");
-            classLabel.setText(member.getCharacterClass().getDisplayName()
-                    + " — " + member.getCharacterClass().getSkillName());
+            
+            classLabel.setText(member.getRoleName() + " — " + member.getSkillName());
+            
             hpBar.setMaximum(member.getMaxHp());
             hpBar.setValue(member.getCurrentHp());
             hpBar.setString(member.getCurrentHp() + " / " + member.getMaxHp() + " HP");
@@ -103,7 +104,7 @@ public final class PartyPanel extends JPanel {
             mpBar.setString(member.getCurrentMp() + " / " + member.getMaxMp() + " MP");
             statsLabel.setText("ATK " + member.getAttack() + "  DEF " + member.getDefense() + "  SPD " + member.getSpeed());
             
-            String spriteKey = "party_" + member.getCharacterClass().name().toLowerCase();
+            String spriteKey = "party_" + member.getClass().getSimpleName().toLowerCase();
             Image img = ImageManager.loadSidebarSprite(spriteKey);
             if (img != null) {
                 Image scaled = img.getScaledInstance(130, 130, Image.SCALE_SMOOTH);
@@ -127,5 +128,5 @@ public final class PartyPanel extends JPanel {
             statsLabel.setEnabled(member.isAlive());
             spriteLabel.setEnabled(member.isAlive());
         }
-    }
+    }   
 }
