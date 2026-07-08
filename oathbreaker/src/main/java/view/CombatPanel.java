@@ -217,7 +217,22 @@ public final class CombatPanel extends BackgroundPanel {
         JPanel statusPanel = new JPanel(new GridLayout(2, 1, 2, 2));
         statusPanel.setOpaque(false);
 
-        JLabel nameLabel = new JLabel(enemy.getName() + (enemy.isAlive() ? "" : " (KO)"), JLabel.CENTER);
+        StringBuilder statusText = new StringBuilder();
+        if (!enemy.isAlive()) {
+            statusText.append(" (KO)");
+        } else {
+            java.util.List<String> statuses = new java.util.ArrayList<>();
+            if (enemy.isPoisoned()) {
+                statuses.add("Veneno: " + enemy.getPoisonTurns() + "t");
+            }
+            if (enemy.isBleeding()) {
+                statuses.add("Sangrado: " + enemy.getBleedTurns() + "t");
+            }
+            if (!statuses.isEmpty()) {
+                statusText.append(" (").append(String.join(", ", statuses)).append(")");
+            }
+        }
+        JLabel nameLabel = new JLabel(enemy.getName() + statusText, JLabel.CENTER);
         nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 12f));
         nameLabel.setForeground(Color.WHITE);
         nameLabel.setEnabled(enemy.isAlive());
@@ -239,7 +254,7 @@ public final class CombatPanel extends BackgroundPanel {
         card.setOpaque(false);
 
         JLabel spriteLabel = new JLabel();
-        // getClass().getSimpleName() devuelve "Warrior", "Mage", etc. Lo pasamos a minúsculas para que coincida con los archivos PNG
+        // getClass().getSimpleName() devuelve "Warrior", "Mage", etc. Lo pasamos a minúsculas para que coincida con tus archivos PNG
         String spriteKey = "party_" + member.getClass().getSimpleName().toLowerCase();
         Image img = ImageManager.loadSprite(spriteKey);
         if (img != null) {
@@ -258,7 +273,22 @@ public final class CombatPanel extends BackgroundPanel {
         JPanel statusPanel = new JPanel(new GridLayout(2, 1, 2, 2));
         statusPanel.setOpaque(false);
 
-        JLabel nameLabel = new JLabel(member.getName() + (member.isAlive() ? "" : " (KO)"), JLabel.CENTER);
+        StringBuilder statusText = new StringBuilder();
+        if (!member.isAlive()) {
+            statusText.append(" (KO)");
+        } else {
+            java.util.List<String> statuses = new java.util.ArrayList<>();
+            if (member.isPoisoned()) {
+                statuses.add("Veneno: " + member.getPoisonTurns() + "t");
+            }
+            if (member.isBleeding()) {
+                statuses.add("Sangrado: " + member.getBleedTurns() + "t");
+            }
+            if (!statuses.isEmpty()) {
+                statusText.append(" (").append(String.join(", ", statuses)).append(")");
+            }
+        }
+        JLabel nameLabel = new JLabel(member.getName() + statusText, JLabel.CENTER);
         nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 12f));
         nameLabel.setForeground(Color.WHITE);
         nameLabel.setEnabled(member.isAlive());

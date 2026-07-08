@@ -91,8 +91,19 @@ public final class PartyPanel extends JPanel {
             add(infoPanel, BorderLayout.CENTER);
         }
 
-void refresh(PartyMember member, boolean isActive) {
-            nameLabel.setText(member.getName() + " (Nv " + member.getLevel() + ")");
+        void refresh(PartyMember member, boolean isActive) {
+            StringBuilder statusText = new StringBuilder();
+            java.util.List<String> statuses = new java.util.ArrayList<>();
+            if (member.isPoisoned()) {
+                statuses.add("Veneno");
+            }
+            if (member.isBleeding()) {
+                statuses.add("Sangrado");
+            }
+            if (!statuses.isEmpty()) {
+                statusText.append(" (").append(String.join(", ", statuses)).append(")");
+            }
+            nameLabel.setText(member.getName() + statusText + " (Nv " + member.getLevel() + ")");
             
             classLabel.setText(member.getRoleName() + " — " + member.getSkillName());
             

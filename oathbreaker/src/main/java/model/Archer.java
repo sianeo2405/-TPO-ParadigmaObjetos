@@ -18,6 +18,7 @@ public class Archer extends PartyMember {
         if (enemyTarget != null && enemyTarget.isAlive()) {
             int damage = this.getAttack() * 5 + 5;
             enemyTarget.takeDamage(damage);
+            enemyTarget.applyBleed(3, .10);
         } else {
             this.restoreMp(getSkillMpCost());
         }

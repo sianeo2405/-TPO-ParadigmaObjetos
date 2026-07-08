@@ -2,7 +2,7 @@ package model;
 
 // Representa un enemigo en el juego, con estadísticas de combate y recompensas por derrotarlo.
 
-public final class Enemy extends Combatant {
+public class Enemy extends Combatant {
     private int attackDebuff;
     private final int goldReward;
     private final int xpReward;
@@ -11,6 +11,16 @@ public final class Enemy extends Combatant {
         super(name, maxHp, attack, defense, speed);
         this.goldReward = goldReward;
         this.xpReward = xpReward;
+    }
+
+    public void executeTurn(controller.CombatEngine engine, Party party) {
+        java.util.List<PartyMember> targets = party.getAliveMembers();
+        if (targets.isEmpty()) {
+            return;
+        }
+        PartyMember target = targets.get(new java.util.Random().nextInt(targets.size()));
+        int damage = getAttack() + new java.util.Random().nextInt(4);
+        target.takeDamage(damage);
     }
 
     public int getGoldReward() {
@@ -36,27 +46,27 @@ public final class Enemy extends Combatant {
     }
 
     public static Enemy goblin() {
-        return new Enemy("Goblin", 45, 10, 2, 14, 15, 20);
+        return new Enemy("Goblin", 60, 15, 2, 14, 15, 20);
     }
 
     public static Enemy wolf() {
-        return new Enemy("Lobo", 55, 14, 3, 16, 20, 25);
+        return new Wolf("Lobo", 55, 10, 3, 16, 20, 25);
     }
 
     public static Enemy skeleton() {
-        return new Enemy("Esqueleto", 60, 12, 5, 9, 25, 30);
+        return new Skeleton("Esqueleto", 45, 12, 5, 9, 25, 30);
     }
 
     public static Enemy orc() {
-        return new Enemy("Orco", 100, 18, 6, 11, 30, 35);
+        return new Enemy("Orco", 100, 25, 6, 11, 30, 35);
     }
 
     public static Enemy darkMage() {
-        return new Enemy("Mago Oscuro", 80, 22, 4, 13, 25, 30);
+        return new DarkMage("Mago Oscuro", 80, 22, 4, 13, 25, 30);
     }
 
     public static Enemy boss() {
-        return new Enemy("Señor Dracónico", 750, 50, 10, 15, 0, 0);
+        return new Boss("Señor Dracónico", 750, 50, 10, 20, 0, 0);
     }
 
     @Override

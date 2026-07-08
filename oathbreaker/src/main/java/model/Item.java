@@ -5,7 +5,7 @@ package model;
 
 public final class Item implements java.io.Serializable {
     
-    // INTERFAZ
+    // 1. LA INTERFAZ
     public interface ItemEffect extends java.io.Serializable {
         String apply(PartyMember target, int potency);
     }
@@ -30,13 +30,13 @@ public final class Item implements java.io.Serializable {
     public int getCost() { return cost; }
     public int getPotency() { return potency; }
 
-    // EJECUCIÓN POLIMÓRFICA
+    // 2. EJECUCIÓN POLIMÓRFICA
     public String applyTo(PartyMember target) {
-        // El ítem no sabe qué hace el efecto, solo le dice "aplicate" y el efecto hace lo suyo.
+        // El ítem no sabe qué hace el efecto, solo le dice "aplegate" y el efecto hace lo suyo.
         return effect.apply(target, potency); 
     }
 
-    // MÉTODOS DE FABRICACIÓN
+    // 3. MÉTODOS DE FABRICACIÓN (Inyectamos las estrategias concretas)
     public static Item healthPotion() {
         return new Item("Poción de Salud", "Restaura HP a un miembro del grupo.", new HealEffect(), 50, 50);
     }
@@ -66,7 +66,7 @@ public final class Item implements java.io.Serializable {
         return name + ": " + description + " (Costo: " + cost + " monedas)";
     }
 
-    // CLASES CONCRETAS
+    // 4. CLASES CONCRETAS (Implementaciones del comportamiento)
     
     public static class HealEffect implements ItemEffect {
         @Override

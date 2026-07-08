@@ -20,9 +20,6 @@ public final class EventPanel extends BackgroundPanel {
     private final JLabel messageLabel = new JLabel("", JLabel.CENTER);
     private final JButton actionButton = new JButton("Continuar");
     private final JPanel messageBoxPanel = new JPanel();
-    private java.awt.Color defaultTitleColor;
-    private java.awt.Color defaultMessageColor;
-
     private GameController controller;
     private Runnable restartAction;
 
@@ -32,8 +29,6 @@ public final class EventPanel extends BackgroundPanel {
 
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 28f));
         messageLabel.setFont(messageLabel.getFont().deriveFont(16f));
-        defaultTitleColor = titleLabel.getForeground();
-        defaultMessageColor = messageLabel.getForeground();
 
         messageBoxPanel.setOpaque(false);
         messageBoxPanel.setLayout(new GridBagLayout());
@@ -80,22 +75,15 @@ public final class EventPanel extends BackgroundPanel {
         messageLabel.setText("<html><div style='text-align:center;width:420px'>"
                 + controller.getStatusMessage() + "</div></html>");
 
-        if (screen == GameScreen.REST) {
-            messageBoxPanel.setOpaque(true);
-            messageBoxPanel.setBackground(java.awt.Color.WHITE);
-            messageBoxPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220), 1),
-                BorderFactory.createEmptyBorder(20, 30, 20, 30)
-            ));
-            titleLabel.setForeground(new java.awt.Color(30, 30, 30));
-            messageLabel.setForeground(new java.awt.Color(60, 60, 60));
-        } else {
-            messageBoxPanel.setOpaque(false);
-            messageBoxPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-            titleLabel.setForeground(defaultTitleColor != null ? defaultTitleColor : java.awt.Color.WHITE);
-            messageLabel.setForeground(defaultMessageColor != null ? defaultMessageColor : java.awt.Color.WHITE);
-        }
-
+        messageBoxPanel.setOpaque(true);
+        messageBoxPanel.setBackground(java.awt.Color.WHITE);
+        messageBoxPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220), 1),
+            BorderFactory.createEmptyBorder(20, 30, 20, 30)
+        ));
+        titleLabel.setForeground(new java.awt.Color(30, 30, 30));
+        messageLabel.setForeground(new java.awt.Color(60, 60, 60));
+        
         switch (screen) {
             case REST -> {
                 setBackgroundImage("rest");

@@ -19,6 +19,8 @@ public class Healer extends PartyMember {
         PartyMember target = (allyTarget != null && allyTarget.isAlive()) ? allyTarget : this;
         int healAmount = this.getMaxHp() / 2;
         target.heal(healAmount);
+        target.clearPoison();
+        target.clearBleed();
     }
 
     // Crecimiento de estadísticas al subir de nivel

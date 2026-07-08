@@ -10,7 +10,7 @@ public class Warrior extends PartyMember {
 
     @Override public String getRoleName() { return "Guerrero"; }
     @Override public String getSkillName() { return "Tacleada Rompe-Armaduras"; }
-    @Override public String getSkillDescription() { return "Hace daño extra y reduce el ataque del enemigo."; }
+    @Override public String getSkillDescription() { return "Hace daño extra, reduce el ataque del enemigo y aplica veneno por 3 turnos."; }
     @Override public int getSkillMpCost() { return 8; }
 
     @Override

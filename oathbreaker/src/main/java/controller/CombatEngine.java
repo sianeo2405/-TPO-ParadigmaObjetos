@@ -29,6 +29,12 @@ public final class CombatEngine implements java.io.Serializable {
         enemies.clear();
         enemies.addAll(encounterEnemies);
         log.clear();
+        
+        for (PartyMember member : party.getMembers()) {
+            member.clearPoison();
+            member.clearBleed();
+        }
+
         determineTurnOrder();
         startNextTurn();
     }
@@ -51,7 +57,16 @@ public final class CombatEngine implements java.io.Serializable {
     private void determineTurnOrder() {
         turnOrder.clear();
         turnOrder.addAll(party.getAliveMembers());
-        turnOrder.addAll(getAliveEnemies());
+        
+        for (Enemy enemy : getAliveEnemies()) {
+            if (enemy instanceof model.Boss boss) {
+                turnOrder.add(boss);
+                turnOrder.add(new model.BossSecondaryTurn(boss, boss.getSecondarySpeed()));
+            } else if (!(enemy instanceof model.BossSecondaryTurn)) {
+                turnOrder.add(enemy);
+            }
+        }
+        
         turnOrder.sort((c1, c2) -> Integer.compare(c2.getSpeed(), c1.getSpeed()));
         currentCombatantIndex = 0;
 
@@ -71,6 +86,33 @@ public final class CombatEngine implements java.io.Serializable {
 
         while (currentCombatantIndex < turnOrder.size()) {
             Combatant next = turnOrder.get(currentCombatantIndex);
+            
+            if (!next.isAlive()) {
+                currentCombatantIndex++;
+                continue;
+            }
+
+            if (next.isPoisoned() || next.isBleeding()) {
+                if (next.isPoisoned()) {
+                    int pDmg = next.getPoisonDamage();
+                    next.takePoisonDamage(pDmg);
+                }
+                if (next.isBleeding()) {
+                    int bDmg = (int) (next.getMaxHp() * next.getBleedPercent());
+                    bDmg = Math.max(1, bDmg);
+                    next.takeBleedDamage(bDmg);
+                }
+                next.decrementStatusTurns();
+
+                if (!next.isAlive()) {
+                    if (isCombatOver() || isPartyWiped()) {
+                        return;
+                    }
+                    currentCombatantIndex++;
+                    continue;
+                }
+            }
+
             if (next.isPlayerControlled()) {
                 playerTurn = true;
                 return;
@@ -123,7 +165,7 @@ public final class CombatEngine implements java.io.Serializable {
         }
         int damage = attacker.getAttack() + random.nextInt(5);
         target.takeDamage(damage);
-        //int restoredMp = attacker.restoreMp(attacker.getMaxMp()/10);
+        attacker.restoreMp(attacker.getMaxMp()/10);
         endPlayerAction();
     }
 
@@ -136,8 +178,7 @@ public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarg
             return; // No tiene MP
         }
 
-        // Una sola línea reemplaza a todo el switch gigante.
-        // El motor le dice al héroe: "Ejecutá tu habilidad, no me importa cómo lo hagas".
+        // Una sola línea reemplaza a todo el switch.
         caster.executeSkill(this, allyTarget, enemyTarget);
         
         endPlayerAction();
@@ -152,15 +193,8 @@ public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarg
         startNextTurn();
     }
 
-    private void runSingleEnemyTurn(Combatant enemy) {
-        List<PartyMember> targets = party.getAliveMembers();
-        if (targets.isEmpty()) {
-            return;
-        }
-
-        PartyMember target = targets.get(random.nextInt(targets.size()));
-        int damage = enemy.getAttack() + random.nextInt(4);
-        target.takeDamage(damage);
+    private void runSingleEnemyTurn(Enemy enemy) {
+        enemy.executeTurn(this, party);
     }
 
     public List<Combatant> getTurnOrder() {

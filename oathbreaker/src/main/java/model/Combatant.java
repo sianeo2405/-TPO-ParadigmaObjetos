@@ -54,4 +54,70 @@ public abstract class Combatant implements java.io.Serializable {
         int reduced = Math.max(1, amount - getDefense());
         currentHp = Math.max(0, currentHp - reduced);
     }
+
+    protected int poisonTurns = 0;
+    protected int poisonDamage = 0;
+    protected int bleedTurns = 0;
+    protected double bleedPercent = 0.0;
+
+    public void applyPoison(int turns, int damagePerTurn) {
+        this.poisonTurns = turns;
+        this.poisonDamage = damagePerTurn;
+    }
+
+    public boolean isPoisoned() {
+        return this.poisonTurns > 0;
+    }
+
+    public int getPoisonTurns() {
+        return this.poisonTurns;
+    }
+
+    public int getPoisonDamage() {
+        return this.poisonDamage;
+    }
+
+    public void applyBleed(int turns, double percent) {
+        this.bleedTurns = turns;
+        this.bleedPercent = percent;
+    }
+
+    public boolean isBleeding() {
+        return this.bleedTurns > 0;
+    }
+
+    public int getBleedTurns() {
+        return this.bleedTurns;
+    }
+
+    public double getBleedPercent() {
+        return this.bleedPercent;
+    }
+
+    public void decrementStatusTurns() {
+        if (this.poisonTurns > 0) this.poisonTurns--;
+        if (this.bleedTurns > 0) this.bleedTurns--;
+    }
+
+    public void takePoisonDamage(int amount) {
+        this.currentHp = Math.max(0, this.currentHp - amount);
+    }
+
+    public void takeBleedDamage(int amount) {
+        this.currentHp = Math.max(0, this.currentHp - amount);
+    }
+
+    public void takeDamageIgnoringDefense(int amount) {
+        this.currentHp = Math.max(0, this.currentHp - amount);
+    }
+
+    public void clearPoison() {
+        this.poisonTurns = 0;
+        this.poisonDamage = 0;
+    }
+
+    public void clearBleed() {
+        this.bleedTurns = 0;
+        this.bleedPercent = 0.0;
+    }
 }
