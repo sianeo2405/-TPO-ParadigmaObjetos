@@ -20,7 +20,6 @@ public final class CombatEngine implements java.io.Serializable {
     private final List<Combatant> turnOrder = new ArrayList<>();
     private int currentCombatantIndex = 0;
     private boolean playerTurn = true;
-    //private int turnIndex;
 
     public CombatEngine(Party party) {
         this.party = party;
@@ -30,8 +29,6 @@ public final class CombatEngine implements java.io.Serializable {
         enemies.clear();
         enemies.addAll(encounterEnemies);
         log.clear();
-        //turnIndex = 0;
-        //append("¡Aparecen enemigos!");
         determineTurnOrder();
         startNextTurn();
     }
@@ -65,7 +62,6 @@ public final class CombatEngine implements java.io.Serializable {
                 sb.append(" -> ");
             }
         }
-        //append(sb.toString());
     }
 
     private void startNextTurn() {
@@ -87,8 +83,6 @@ public final class CombatEngine implements java.io.Serializable {
             }
         }
 
-        //turnIndex++;
-        //append("— Turno " + (turnIndex + 1) + " —");
         determineTurnOrder();
         startNextTurn();
     }
@@ -130,7 +124,6 @@ public final class CombatEngine implements java.io.Serializable {
         int damage = attacker.getAttack() + random.nextInt(5);
         target.takeDamage(damage);
         //int restoredMp = attacker.restoreMp(attacker.getMaxMp()/10);
-        //append(attacker.getName() + " ataca a " + target.getName() + " por " + damage + " daño y recupera " + restoredMp + " de MP.");
         endPlayerAction();
     }
 
@@ -143,7 +136,7 @@ public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarg
             return; // No tiene MP
         }
 
-        // ¡MAGIA DE POO! Una sola línea reemplaza a todo el switch gigante.
+        // Una sola línea reemplaza a todo el switch gigante.
         // El motor le dice al héroe: "Ejecutá tu habilidad, no me importa cómo lo hagas".
         caster.executeSkill(this, allyTarget, enemyTarget);
         
@@ -152,7 +145,6 @@ public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarg
 
     private void endPlayerAction() {
         if (isCombatOver()) {
-            //append("Los enemigos caen. ¡Victoria!");
             playerTurn = false;
             return;
         }
@@ -163,14 +155,12 @@ public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarg
     private void runSingleEnemyTurn(Combatant enemy) {
         List<PartyMember> targets = party.getAliveMembers();
         if (targets.isEmpty()) {
-            //append("Tu equipo fue derrotado...");
             return;
         }
 
         PartyMember target = targets.get(random.nextInt(targets.size()));
         int damage = enemy.getAttack() + random.nextInt(4);
         target.takeDamage(damage);
-        //append(enemy.getName() + " ataca a " + target.getName() + " por " + damage + " daño.");
     }
 
     public List<Combatant> getTurnOrder() {
@@ -180,11 +170,4 @@ public void useSkill(PartyMember caster, PartyMember allyTarget, Enemy enemyTarg
     public int getCurrentCombatantIndex() {
         return currentCombatantIndex;
     }
-
-    /*private void append(String message) {
-        log.add(message);
-        if (log.size() > 80) {
-            log.remove(0);
-        }
-    }*/
 }
