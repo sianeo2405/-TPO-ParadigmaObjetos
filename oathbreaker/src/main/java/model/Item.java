@@ -32,7 +32,7 @@ public final class Item implements java.io.Serializable {
 
     // 2. EJECUCIÓN POLIMÓRFICA
     public String applyTo(PartyMember target) {
-        // El ítem no sabe qué hace el efecto, solo le dice "aplegate" y el efecto hace lo suyo.
+        // El ítem no sabe qué hace el efecto, solo le dice "apicate" y el efecto hace lo suyo.
         return effect.apply(target, potency); 
     }
 
