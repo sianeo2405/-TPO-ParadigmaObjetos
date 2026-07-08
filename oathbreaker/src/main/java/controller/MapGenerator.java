@@ -13,7 +13,7 @@ import java.util.Random;
 // conectándolos de manera que se pueda navegar a través de ellos.
 
 public final class MapGenerator {
-    private static final int ROWS = 3;
+    private static final int ROWS = 10;
     private static final int NODES_PER_ROW = 5;
     private final Random random = new Random();
 
