@@ -239,7 +239,7 @@ public final class CombatPanel extends BackgroundPanel {
         card.setOpaque(false);
 
         JLabel spriteLabel = new JLabel();
-        // getClass().getSimpleName() devuelve "Warrior", "Mage", etc. Lo pasamos a minúsculas para que coincida con tus archivos PNG
+        // getClass().getSimpleName() devuelve "Warrior", "Mage", etc. Lo pasamos a minúsculas para que coincida con los archivos PNG
         String spriteKey = "party_" + member.getClass().getSimpleName().toLowerCase();
         Image img = ImageManager.loadSprite(spriteKey);
         if (img != null) {
