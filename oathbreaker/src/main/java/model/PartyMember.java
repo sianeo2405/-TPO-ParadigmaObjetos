@@ -25,7 +25,7 @@ public abstract class PartyMember extends Combatant {
     }
 
     // ==========================================
-    // CONTRATOS ABSTRACTOS (El corazón del Polimorfismo)
+    // CONTRATOS ABSTRACTOS (Polimorfismo)
     // ==========================================
     public abstract String getRoleName();
     public abstract String getSkillName();
@@ -171,7 +171,6 @@ public abstract class PartyMember extends Combatant {
     // ==========================================
     public static Party createDefaultParty() {
         List<PartyMember> members = new ArrayList<>();
-        // NOTA: Estas líneas marcarán error temporalmente hasta que hagamos la Fase 2.
         members.add(new Warrior("Altria", 120, 30, 18, 8, 10));
         members.add(new Healer("Jean", 85, 50, 12, 3, 12));
         members.add(new Archer("Emil", 70, 35, 20, 4, 15));
